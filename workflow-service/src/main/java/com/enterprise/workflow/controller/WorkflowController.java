@@ -103,6 +103,13 @@ public class WorkflowController {
         return ResponseEntity.ok(workflowService.getDashboardStats());
     }
 
+    @GetMapping("/throughput")
+    public ResponseEntity<List<Map<String, Object>>> getThroughput(
+            @RequestParam(defaultValue = "24") int hours) {
+        int clampedHours = Math.min(Math.max(hours, 1), 168); // 1h–7d
+        return ResponseEntity.ok(workflowService.getThroughput(clampedHours));
+    }
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of("status", "UP", "service", "workflow-service"));

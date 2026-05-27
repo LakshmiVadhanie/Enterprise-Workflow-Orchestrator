@@ -52,4 +52,20 @@ public interface WorkflowRepository extends JpaRepository<Workflow, UUID> {
             @Param("ownerId") String ownerId,
             Pageable pageable
     );
+
+    /**
+     * Returns [hourBucket (LocalDateTime), status (String), count (Long)]
+     * rows grouped by hour for the throughput area chart.
+     */
+    @Query("""
+        SELECT
+          FUNCTION('date_trunc', 'hour', w.createdAt) AS bucket,
+          w.status,
+          COUNT(w)
+        FROM Workflow w
+        WHERE w.createdAt >= :since
+        GROUP BY FUNCTION('date_trunc', 'hour', w.createdAt), w.status
+        ORDER BY bucket ASC
+    """)
+    List<Object[]> findThroughputByHour(@Param("since") LocalDateTime since);
 }

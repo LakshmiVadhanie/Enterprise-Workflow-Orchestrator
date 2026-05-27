@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
-import { fetchStats, fetchWorkflows, STATUS_COLORS } from '../utils/api'
+import { fetchStats, fetchWorkflows, gql, STATUS_COLORS } from '../utils/api'
 import StatCard from '../components/StatCard'
 import LiveFeed from '../components/LiveFeed'
 import ServiceHealth from '../components/ServiceHealth'
@@ -11,19 +12,12 @@ import WorkflowCard from '../components/WorkflowCard'
 import { useStore } from '../store'
 import styles from './Dashboard.module.css'
 
-// Mock time-series data to show the chart (replace with real metrics in prod)
-const MOCK_THROUGHPUT = [
-  { time: '00:00', running: 4, completed: 12, failed: 1 },
-  { time: '04:00', running: 2, completed: 8,  failed: 0 },
-  { time: '08:00', running: 8, completed: 24, failed: 2 },
-  { time: '10:00', running: 14, completed: 31, failed: 1 },
-  { time: '12:00', running: 18, completed: 42, failed: 3 },
-  { time: '14:00', running: 22, completed: 56, failed: 2 },
-  { time: '16:00', running: 16, completed: 61, failed: 1 },
-  { time: '18:00', running: 9,  completed: 67, failed: 0 },
-  { time: '20:00', running: 5,  completed: 71, failed: 1 },
-  { time: '22:00', running: 3,  completed: 74, failed: 0 },
-]
+// Live throughput fetcher — queries GraphQL workflowThroughput
+const fetchThroughput = (hours) => gql(`
+  query GetThroughput($hours: Int) {
+    workflowThroughput(hours: $hours) { time running completed failed }
+  }
+`, { hours })
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
@@ -41,6 +35,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function Dashboard() {
+  const [throughputHours, setThroughputHours] = useState(24)
+
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: fetchStats,
@@ -53,9 +49,16 @@ export default function Dashboard() {
     refetchInterval: 20000,
   })
 
+  const { data: throughputData, isLoading: throughputLoading } = useQuery({
+    queryKey: ['throughput', throughputHours],
+    queryFn: () => fetchThroughput(throughputHours),
+    refetchInterval: 60000,
+  })
+
   const stats = statsData?.dashboardStats
   const health = statsData?.serviceHealth
   const workflows = workflowsData?.workflows?.content || []
+  const throughput = throughputData?.workflowThroughput || []
 
   // Build pie data from type breakdown
   const typeData = stats?.byType
@@ -142,11 +145,22 @@ export default function Dashboard() {
         <div className={`${styles.panel} ${styles.chartPanel}`}>
           <div className={styles.panelHeader}>
             <span className={styles.panelTitle}>Workflow Throughput</span>
-            <span className={styles.panelSub}>Last 24 hours</span>
+            <div className={styles.timeToggle}>
+              {[{label:'24h',val:24},{label:'48h',val:48},{label:'7d',val:168}].map(opt => (
+                <button
+                  key={opt.val}
+                  className={`${styles.toggleBtn} ${throughputHours === opt.val ? styles.toggleActive : ''}`}
+                  onClick={() => setThroughputHours(opt.val)}
+                >{opt.label}</button>
+              ))}
+            </div>
           </div>
           <div className={styles.chartWrap}>
+            {throughputLoading ? (
+              <div className={styles.chartSkeleton} />
+            ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={MOCK_THROUGHPUT} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
+              <AreaChart data={throughput} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradRunning" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.25} />
@@ -170,6 +184,7 @@ export default function Dashboard() {
                 <Area type="monotone" dataKey="failed"    stroke="#ef4444" strokeWidth={1.5} fill="url(#gradFailed)"    dot={false} strokeDasharray="4 2" />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
           <div className={styles.chartLegend}>
             {[

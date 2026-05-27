@@ -254,3 +254,47 @@
 
 @media (max-width: 1100px) { .workflowGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px)  { .workflowGrid { grid-template-columns: 1fr; } }
+
+/* Throughput time-range toggle */
+.timeToggle {
+  display: flex;
+  gap: 4px;
+}
+
+.toggleBtn {
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.toggleBtn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+.toggleActive {
+  background: rgba(0, 212, 255, 0.12);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* Chart skeleton loader */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.chartSkeleton {
+  height: 220px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--bg-panel) 25%,
+    rgba(0, 212, 255, 0.05) 50%,
+    var(--bg-panel) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+}

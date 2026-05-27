@@ -134,6 +134,13 @@ const typeDefs = gql`
     byType: JSON
   }
 
+  type ThroughputPoint {
+    time: String!
+    running: Int!
+    completed: Int!
+    failed: Int!
+  }
+
   type User {
     id: ID!
     email: String!
@@ -199,6 +206,8 @@ const typeDefs = gql`
     workflow(id: ID!): Workflow
 
     dashboardStats: DashboardStats!
+
+    workflowThroughput(hours: Int): [ThroughputPoint!]!
 
     # Auth/User queries
     users(department: String, role: String, isActive: Boolean): UserPage!
@@ -307,6 +316,17 @@ const resolvers = {
     dashboardStats: async (_, __, { dataSources }) => {
       const { data } = await dataSources.workflowAPI.get('/api/workflows/stats');
       return data;
+    },
+
+    workflowThroughput: async (_, { hours = 24 }, { dataSources }) => {
+      const { data } = await dataSources.workflowAPI.get(`/api/workflows/throughput?hours=${hours}`);
+      // Coerce Long values from Java to JS numbers
+      return data.map(p => ({
+        time:      p.time,
+        running:   Number(p.running   ?? 0),
+        completed: Number(p.completed ?? 0),
+        failed:    Number(p.failed    ?? 0),
+      }));
     },
 
     users: async (_, args, { dataSources }) => {

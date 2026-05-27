@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -177,6 +178,43 @@ public class WorkflowService {
         stats.put("byType", typeBreakdown);
 
         return stats;
+    }
+
+    /**
+     * Returns hourly throughput buckets for the last {@code hours} hours.
+     * Each bucket: { time: "HH:00", running: N, completed: N, failed: N }
+     * Gaps (hours with no activity) are filled with zero rows.
+     */
+    public List<Map<String, Object>> getThroughput(int hours) {
+        LocalDateTime since = LocalDateTime.now().minusHours(hours);
+        List<Object[]> rows = workflowRepository.findThroughputByHour(since);
+
+        // Index DB results by bucket→status
+        Map<String, Map<String, Long>> index = new LinkedHashMap<>();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:00");
+        for (Object[] row : rows) {
+            LocalDateTime bucket = (LocalDateTime) row[0];
+            String status     = row[1].toString();
+            Long   count      = (Long) row[2];
+            String key = bucket.format(fmt);
+            index.computeIfAbsent(key, k -> new HashMap<>()).put(status, count);
+        }
+
+        // Build a continuous hourly timeline so the chart has no gaps
+        List<Map<String, Object>> result = new ArrayList<>();
+        LocalDateTime cursor = since.withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime end    = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        while (!cursor.isAfter(end)) {
+            String key = cursor.format(fmt);
+            Map<String, Object> point = new LinkedHashMap<>();
+            point.put("time",      key);
+            point.put("running",   index.getOrDefault(key, Map.of()).getOrDefault("RUNNING",   0L));
+            point.put("completed", index.getOrDefault(key, Map.of()).getOrDefault("COMPLETED", 0L));
+            point.put("failed",    index.getOrDefault(key, Map.of()).getOrDefault("FAILED",    0L));
+            result.add(point);
+            cursor = cursor.plusHours(1);
+        }
+        return result;
     }
 
     // ─── Private Helpers ────────────────────────────────────────────────────────

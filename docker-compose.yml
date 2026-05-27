@@ -35,7 +35,7 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - "8081:8001"
     environment:
       DATABASE_URL: postgresql://workflow:workflow_secret@postgres:5432/workflow_db
       REDIS_URL: redis://redis:6379/0
@@ -61,7 +61,7 @@ services:
       context: ./workflow-service
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8082:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/workflow_db
       SPRING_DATASOURCE_USERNAME: workflow
@@ -84,7 +84,7 @@ services:
       context: ./graphql-gateway
       dockerfile: Dockerfile
     ports:
-      - "4001:4001"
+      - "4011:4001"
     environment:
       WORKFLOW_SERVICE_URL: http://workflow-service:8080
       AUTH_SERVICE_URL: http://auth-service:8001
@@ -100,7 +100,7 @@ services:
       context: ./bff-server
       dockerfile: Dockerfile
     ports:
-      - "4000:4000"
+      - "4010:4000"
     environment:
       GRAPHQL_GATEWAY_URL: http://graphql-gateway:4001/graphql
       AUTH_SERVICE_URL: http://auth-service:8001
@@ -118,11 +118,11 @@ services:
       context: ./dashboard
       dockerfile: Dockerfile
     ports:
-      - "5173:80"
+      - "5180:80"
     environment:
-      VITE_BFF_URL: http://localhost:4000
-      VITE_GRAPHQL_URL: http://localhost:4001/graphql
-      VITE_WS_URL: ws://localhost:4000
+      VITE_BFF_URL: http://localhost:4010
+      VITE_GRAPHQL_URL: http://localhost:4011/graphql
+      VITE_WS_URL: ws://localhost:4010
     depends_on:
       - bff-server
 

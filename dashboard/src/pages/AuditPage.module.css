@@ -1,0 +1,78 @@
+.page { display: flex; flex-direction: column; gap: 24px; animation: fadeSlideUp 0.3s ease; }
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; }
+.title { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 4px; }
+.sub { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+.summary { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.summaryChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--ac);
+}
+
+.summaryCount { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--ac); }
+.summaryAction { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; }
+
+.tableWrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table { width: 100%; border-collapse: collapse; }
+
+.table thead tr { border-bottom: 1px solid var(--border); }
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.row { border-bottom: 1px solid rgba(30,45,61,0.5); transition: background 0.12s; }
+.row:hover { background: var(--bg-hover); }
+.row:last-child { border-bottom: none; }
+
+.table td { padding: 11px 16px; vertical-align: middle; }
+
+.ts { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+.actor { font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); }
+
+.action {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.resource { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); }
+.resId { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+
+.payload {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  display: block;
+}

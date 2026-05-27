@@ -1,0 +1,36 @@
+.layout {
+  display: grid;
+  min-height: 100vh;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.sidebarOpen {
+  grid-template-columns: 240px 1fr;
+}
+
+.sidebarClosed {
+  grid-template-columns: 64px 1fr;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg-void);
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr !important;
+  }
+  .content {
+    padding: 16px;
+  }
+}

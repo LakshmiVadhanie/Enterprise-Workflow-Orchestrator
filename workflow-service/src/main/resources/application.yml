@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: workflow-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/workflow_db}
+    username: ${SPRING_DATASOURCE_USERNAME:workflow}
+    password: ${SPRING_DATASOURCE_PASSWORD:workflow_secret}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-key-minimum-256-bits-long}
+    expiration: 86400000 # 24 hours
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8001}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.enterprise.workflow: DEBUG
+    org.springframework.statemachine: INFO

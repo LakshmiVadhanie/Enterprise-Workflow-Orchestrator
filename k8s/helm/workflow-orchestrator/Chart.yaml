@@ -1,0 +1,14 @@
+apiVersion: v2
+name: workflow-orchestrator
+description: Enterprise Workflow Orchestrator - Full microservices stack
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - workflow
+  - microservices
+  - orchestration
+  - enterprise
+maintainers:
+  - name: Your Team
+    email: devops@yourcompany.com

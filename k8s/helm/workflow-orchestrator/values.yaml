@@ -1,0 +1,116 @@
+# Default values for workflow-orchestrator Helm chart
+# Override with: helm install -f my-values.yaml or --set key=value
+
+global:
+  imageRegistry: gcr.io/your-gcp-project
+  imagePullPolicy: IfNotPresent
+  namespace: production
+
+# ─── Workflow Service (Spring Boot) ──────────────────────────────────────────
+workflowService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: workflow-service
+    tag: latest
+  resources:
+    requests: { cpu: "250m", memory: "512Mi" }
+    limits:   { cpu: "1000m", memory: "1Gi" }
+  env:
+    JWT_SECRET: "change-me-in-prod"
+  service:
+    type: ClusterIP
+    port: 8080
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+# ─── Auth Service (Django) ────────────────────────────────────────────────────
+authService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: auth-service
+    tag: latest
+  resources:
+    requests: { cpu: "100m", memory: "256Mi" }
+    limits:   { cpu: "500m", memory: "512Mi" }
+  service:
+    type: ClusterIP
+    port: 8001
+
+# ─── GraphQL Gateway ──────────────────────────────────────────────────────────
+graphqlGateway:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: graphql-gateway
+    tag: latest
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "256Mi" }
+  service:
+    type: ClusterIP
+    port: 4001
+
+# ─── BFF Server ───────────────────────────────────────────────────────────────
+bffServer:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: bff-server
+    tag: latest
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "256Mi" }
+  service:
+    type: ClusterIP
+    port: 4000
+
+# ─── Dashboard ────────────────────────────────────────────────────────────────
+dashboard:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: dashboard
+    tag: latest
+  resources:
+    requests: { cpu: "50m", memory: "64Mi" }
+    limits:   { cpu: "200m", memory: "128Mi" }
+  service:
+    type: ClusterIP
+    port: 80
+
+# ─── Ingress ──────────────────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  host: workflow.your-domain.com
+  tls: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+# ─── PostgreSQL (use Cloud SQL in prod) ───────────────────────────────────────
+postgresql:
+  enabled: true
+  auth:
+    username: workflow
+    password: workflow_secret
+    database: workflow_db
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+
+# ─── Redis ────────────────────────────────────────────────────────────────────
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi

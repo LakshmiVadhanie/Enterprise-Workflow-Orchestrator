@@ -1,0 +1,130 @@
+version: "3.9"
+
+services:
+  # ─── Infrastructure ───────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: workflow
+      POSTGRES_PASSWORD: workflow_secret
+      POSTGRES_DB: workflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Auth Service (Django) ─────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql://workflow:workflow_secret@postgres:5432/workflow_db
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: django-insecure-dev-key-change-in-production
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+      JWT_SECRET: jwt-super-secret-key-change-in-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./auth-service:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py loaddata fixtures/initial_data.json &&
+             python manage.py runserver 0.0.0.0:8001"
+
+  # ─── Workflow Service (Spring Boot) ────────────────────────────────────────
+  workflow-service:
+    build:
+      context: ./workflow-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/workflow_db
+      SPRING_DATASOURCE_USERNAME: workflow
+      SPRING_DATASOURCE_PASSWORD: workflow_secret
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      AUTH_SERVICE_URL: http://auth-service:8001
+      JWT_SECRET: jwt-super-secret-key-change-in-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  # ─── GraphQL Gateway ───────────────────────────────────────────────────────
+  graphql-gateway:
+    build:
+      context: ./graphql-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      WORKFLOW_SERVICE_URL: http://workflow-service:8080
+      AUTH_SERVICE_URL: http://auth-service:8001
+      PORT: 4001
+      NODE_ENV: development
+    depends_on:
+      - workflow-service
+      - auth-service
+
+  # ─── BFF Server (Express.js) ───────────────────────────────────────────────
+  bff-server:
+    build:
+      context: ./bff-server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      GRAPHQL_GATEWAY_URL: http://graphql-gateway:4001/graphql
+      AUTH_SERVICE_URL: http://auth-service:8001
+      WORKFLOW_SERVICE_WS: ws://workflow-service:8080/ws
+      PORT: 4000
+      NODE_ENV: development
+      JWT_SECRET: jwt-super-secret-key-change-in-prod
+    depends_on:
+      - graphql-gateway
+      - workflow-service
+
+  # ─── Dashboard (React/Vite) ────────────────────────────────────────────────
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      VITE_BFF_URL: http://localhost:4000
+      VITE_GRAPHQL_URL: http://localhost:4001/graphql
+      VITE_WS_URL: ws://localhost:4000
+    depends_on:
+      - bff-server
+
+volumes:
+  postgres_data:

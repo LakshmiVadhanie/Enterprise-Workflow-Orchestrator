@@ -1,0 +1,28 @@
+{
+  "name": "bff-server",
+  "version": "1.0.0",
+  "description": "Backend-for-Frontend: Express.js server with WebSocket hub and API aggregation",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "axios": "^1.6.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "http-proxy-middleware": "^3.0.0",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cache": "^5.1.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

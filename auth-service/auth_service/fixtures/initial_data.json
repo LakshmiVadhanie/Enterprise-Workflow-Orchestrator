@@ -1,0 +1,52 @@
+[
+  {
+    "model": "auth_service.role",
+    "pk": "11111111-1111-1111-1111-111111111111",
+    "fields": {
+      "name": "ADMIN",
+      "description": "Full system access",
+      "permissions": ["WORKFLOW:*", "USER:*", "ROLE:*", "REPORT:*", "SETTINGS:*"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "auth_service.role",
+    "pk": "22222222-2222-2222-2222-222222222222",
+    "fields": {
+      "name": "MANAGER",
+      "description": "Manage workflows and team",
+      "permissions": ["WORKFLOW:CREATE", "WORKFLOW:READ", "WORKFLOW:UPDATE", "WORKFLOW:APPROVE", "REPORT:READ"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "auth_service.role",
+    "pk": "33333333-3333-3333-3333-333333333333",
+    "fields": {
+      "name": "ANALYST",
+      "description": "Create and monitor workflows",
+      "permissions": ["WORKFLOW:CREATE", "WORKFLOW:READ", "REPORT:READ"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "auth_service.role",
+    "pk": "44444444-4444-4444-4444-444444444444",
+    "fields": {
+      "name": "VIEWER",
+      "description": "Read-only access",
+      "permissions": ["WORKFLOW:READ", "REPORT:READ"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "auth_service.role",
+    "pk": "55555555-5555-5555-5555-555555555555",
+    "fields": {
+      "name": "APPROVER",
+      "description": "Can approve workflow steps",
+      "permissions": ["WORKFLOW:READ", "WORKFLOW:APPROVE"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]

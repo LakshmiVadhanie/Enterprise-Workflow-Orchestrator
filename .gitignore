@@ -1,0 +1,45 @@
+# Environment
+.env
+*.env.local
+.env.production
+
+# Java
+target/
+*.class
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.jar
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+db.sqlite3
+
+# Node
+node_modules/
+dist/
+.next/
+*.log
+npm-debug.log*
+
+# Docker
+.docker/
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+.DS_Store
+
+# Kubernetes secrets
+*-secret.yaml
+secrets/
+
+# Build artifacts
+*.zip

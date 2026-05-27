@@ -1,0 +1,124 @@
+{{- if .Values.workflowService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: workflow-service
+    version: {{ .Values.workflowService.image.tag | quote }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.workflowService.replicaCount }}
+  selector:
+    matchLabels:
+      app: workflow-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0    # Zero-downtime rolling update
+  template:
+    metadata:
+      labels:
+        app: workflow-service
+        version: {{ .Values.workflowService.image.tag | quote }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/api/actuator/prometheus"
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: workflow-service
+          image: {{ .Values.global.imageRegistry }}/{{ .Values.workflowService.image.repository }}:{{ .Values.workflowService.image.tag }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: jwt-secret
+            - name: SPRING_REDIS_HOST
+              value: redis-master
+            - name: AUTH_SERVICE_URL
+              value: http://auth-service:8001
+          resources:
+            requests:
+              cpu: {{ .Values.workflowService.resources.requests.cpu }}
+              memory: {{ .Values.workflowService.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.workflowService.resources.limits.cpu }}
+              memory: {{ .Values.workflowService.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /api/workflows/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workflow-service
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: workflow-service
+  ports:
+    - port: {{ .Values.workflowService.service.port }}
+      targetPort: 8080
+      name: http
+  type: {{ .Values.workflowService.service.type }}
+---
+{{- if .Values.workflowService.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: workflow-service-hpa
+  namespace: {{ .Values.global.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: workflow-service
+  minReplicas: {{ .Values.workflowService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.workflowService.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.workflowService.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,99 @@
+.page { display: flex; flex-direction: column; gap: 24px; animation: fadeSlideUp 0.3s ease; }
+
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; }
+
+.title { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 4px; }
+
+.sub { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+.roleSummary {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) { .roleSummary { grid-template-columns: repeat(3, 1fr); } }
+
+.roleCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  border-top: 2px solid var(--rc);
+  transition: transform 0.15s;
+}
+.roleCard:hover { transform: translateY(-2px); }
+
+.roleCount { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--rc); line-height: 1; margin-bottom: 4px; }
+
+.roleName { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.08em; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: all 0.15s;
+}
+.card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+
+.inactive { opacity: 0.5; }
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--bg-void);
+}
+
+.info { flex: 1; }
+
+.name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; font-family: var(--font-display); }
+
+.email { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+
+.dept { font-size: 11px; color: var(--text-muted); }
+
+.roles { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.roleTag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+  letter-spacing: 0.05em;
+}
+
+.inactiveBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: var(--bg-surface);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.08em;
+}

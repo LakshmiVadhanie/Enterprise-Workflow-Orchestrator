@@ -24,6 +24,9 @@ public class WorkflowEvent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workflow_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Workflow workflow;
 
     @Column(name = "event_type", nullable = false)

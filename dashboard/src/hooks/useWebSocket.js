@@ -3,7 +3,7 @@ import { useStore } from '../store'
 
 const WS_URL = import.meta.env.VITE_WS_URL
   ? `${import.meta.env.VITE_WS_URL}/ws`
-  : `ws://${window.location.hostname}:4000/ws`
+  : `ws://${window.location.hostname}:4010/ws`
 
 export function useWebSocket() {
   const wsRef = useRef(null)

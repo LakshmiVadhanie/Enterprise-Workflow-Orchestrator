@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const BFF_URL = import.meta.env.VITE_BFF_URL || 'http://localhost:4000'
-const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:4001/graphql'
+const BFF_URL = import.meta.env.VITE_BFF_URL || 'http://localhost:4010'
+const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:4011/graphql'
 
 export const api = axios.create({
   baseURL: BFF_URL,
